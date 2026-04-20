@@ -1,7 +1,7 @@
 /*
  * Name: Max Ramos
- * Date: April 12, 2026
- * Assignment: Week 1 Project - Employee Management Application
+ * Date: April 19, 2026
+ * Assignment: Week 2 Project - Employee Management Application
  * Purpose: Department class used to demonstrate composition.
  */
 

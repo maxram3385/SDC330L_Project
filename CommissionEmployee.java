@@ -1,11 +1,11 @@
 /*
  * Name: Max Ramos
- * Date: April 12, 2026
- * Assignment: Week 1 Project - Employee Management Application
- * Purpose: Child class of Employee used to demonstrate inheritance.
+ * Date: April 19, 2026
+ * Assignment: Week 2 Project - Employee Management Application
+ * Purpose: Child class of Employee used to demonstrate inheritance and interface implementation.
  */
 
-public class CommissionEmployee extends Employee {
+public class CommissionEmployee extends Employee implements Payable {
     private double basePay;
     private double commissionRate;
     private double salesAmount;
@@ -25,10 +25,16 @@ public class CommissionEmployee extends Employee {
     }
 
     @Override
+    public double calculatePay() {
+        return basePay + (commissionRate * salesAmount);
+    }
+
+    @Override
     public String toString() {
         return super.toString() +
                "\nBase Pay: $" + basePay +
                "\nCommission Rate: " + commissionRate +
-               "\nSales Amount: $" + salesAmount;
+               "\nSales Amount: $" + salesAmount +
+               "\nCalculated Pay: $" + String.format("%.2f", calculatePay());
     }
 }

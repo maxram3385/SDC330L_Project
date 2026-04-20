@@ -1,7 +1,7 @@
 /*
  * Name: Max Ramos
- * Date: April 12, 2026
- * Assignment: Week 1 Project - Employee Management Application
+ * Date: April 19, 2026
+ * Assignment: Week 2 Project - Employee Management Application
  * Purpose: Base Employee class used to demonstrate inheritance.
  * Composition is shown because each Employee has a Department object.
  */
@@ -10,7 +10,7 @@ public class Employee {
     private int employeeId;
     private String firstName;
     private String lastName;
-    private Department department; // Composition
+    private Department department;
 
     public Employee(int employeeId, String firstName, String lastName, Department department) {
         this.employeeId = employeeId;

@@ -1,9 +1,9 @@
 /*
  * Name: Max Ramos
- * Date: April 12, 2026
- * Assignment: Week 1 Project - Employee Management Application
+ * Date: April 19, 2026
+ * Assignment: Week 2 Project - Employee Management Application
  * Purpose: Main application file that allows the user to manage employees
- * through a console-based menu system.
+ * and demonstrate an interface and polymorphism in a console-based program.
  */
 
 import java.util.ArrayList;
@@ -14,7 +14,6 @@ public class App {
         Scanner scanner = new Scanner(System.in);
         ArrayList<Employee> employees = new ArrayList<>();
 
-        // Sample employee data
         employees.add(new HourlyEmployee(
                 101, "John", "Smith",
                 new Department("Sales", "Building A"),
@@ -30,26 +29,32 @@ public class App {
         employees.add(new CommissionEmployee(
                 103, "Mike", "Brown",
                 new Department("Marketing", "Building C"),
-                30000, 0.10, 20000
+                700.00, 0.10, 5000
         ));
 
         int choice;
 
+        System.out.println("==================================================");
+        System.out.println("Project Week 2 - Employee Management Application");
+        System.out.println("By Max Ramos");
+        System.out.println("==================================================");
+        System.out.println("Welcome to the Employee Management Application.");
+        System.out.println("Use the menu below to add, remove, update, display,");
+        System.out.println("and calculate employee pay information.");
+
         do {
-            System.out.println("\n==========================================");
-            System.out.println("Week 1 Project - Employee Management App");
-            System.out.println("By Max Ramos");
-            System.out.println("==========================================");
+            System.out.println("\n================ MENU ================");
             System.out.println("1. Add Employee");
             System.out.println("2. Remove Employee");
             System.out.println("3. Update Employee");
             System.out.println("4. Display All Employees");
             System.out.println("5. Display Employees by Type");
-            System.out.println("6. Exit");
+            System.out.println("6. Display Employee Pay");
+            System.out.println("7. Exit");
             System.out.print("Enter your choice: ");
 
             choice = scanner.nextInt();
-            scanner.nextLine(); // clear buffer
+            scanner.nextLine();
 
             switch (choice) {
                 case 1:
@@ -68,13 +73,16 @@ public class App {
                     displayEmployeesByType(scanner, employees);
                     break;
                 case 6:
+                    displayEmployeePay(employees);
+                    break;
+                case 7:
                     System.out.println("Thank you for using the Employee Management Application. Goodbye.");
                     break;
                 default:
                     System.out.println("Invalid choice. Please try again.");
             }
 
-        } while (choice != 6);
+        } while (choice != 7);
 
         scanner.close();
     }
@@ -237,6 +245,27 @@ public class App {
 
         if (!found) {
             System.out.println("No employees of that type found.");
+        }
+    }
+
+    public static void displayEmployeePay(ArrayList<Employee> employees) {
+        if (employees.isEmpty()) {
+            System.out.println("No employees to display.");
+            return;
+        }
+
+        System.out.println("\nEmployee Payment Information");
+        System.out.println("==========================================");
+
+        for (Employee employee : employees) {
+            if (employee instanceof Payable) {
+                Payable payableEmployee = (Payable) employee;
+
+                System.out.println("----------------------------------");
+                System.out.println(employee.getFirstName() + " " + employee.getLastName());
+                System.out.println("Type: " + employee.getEmployeeType());
+                System.out.println("Pay this period: $" + String.format("%.2f", payableEmployee.calculatePay()));
+            }
         }
     }
 }
