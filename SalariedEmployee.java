@@ -1,6 +1,6 @@
 /*
  * Name: Max Ramos
- * Date: April 26, 2026
+ * Date: March 3, 2026
  * Assignment: Week 3 Project - Employee Management Application
  * Purpose: Child class of Employee used to demonstrate inheritance,
  * abstraction, constructors, and pay calculation.
@@ -40,6 +40,14 @@ public class SalariedEmployee extends Employee {
     @Override
     public double calculatePay() {
         return annualSalary / 52;
+    }
+
+    public double getAnnualSalary() {
+        return annualSalary;
+    }
+
+    public void setAnnualSalary(double annualSalary) {
+        this.annualSalary = annualSalary;
     }
 
     @Override

@@ -1,6 +1,6 @@
 /*
  * Name: Max Ramos
- * Date: April 26, 2026
+ * Date: May 3, 2026
  * Assignment: Week 3 Project - Employee Management Application
  * Purpose: Child class of Employee used to demonstrate inheritance,
  * abstraction, constructors, and pay calculation.
@@ -47,6 +47,30 @@ public class CommissionEmployee extends Employee {
     @Override
     public double calculatePay() {
         return basePay + (commissionRate * salesAmount);
+    }
+
+    public double getBasePay() {
+        return basePay;
+    }
+
+    public double getCommissionRate() {
+        return commissionRate;
+    }
+
+    public double getSalesAmount() {
+        return salesAmount;
+    }
+
+    public void setBasePay(double basePay) {
+        this.basePay = basePay;
+    }
+
+    public void setCommissionRate(double commissionRate) {
+        this.commissionRate = commissionRate;
+    }
+
+    public void setSalesAmount(double salesAmount) {
+        this.salesAmount = salesAmount;
     }
 
     @Override

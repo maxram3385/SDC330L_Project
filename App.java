@@ -1,102 +1,242 @@
 /*
  * Name: Max Ramos
- * Date: April 26, 2026
- * Assignment: Week 3 Project - Employee Management Application
- * Purpose: Main application file that allows the user to manage employees
- * through a console-based menu system. This version demonstrates abstraction,
- * constructors, access specifiers, composition, and polymorphism.
+ * Date: May 3 2026
+ * Assignment: Week 4 Project - Database Interactions
+ * Purpose: Main application file that allows the user to manage employee records
+ * through a console menu. This version stores data in a SQLite database and
+ * demonstrates Create, Read, Update, and Delete database operations.
  */
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class App {
     public static void main(String[] args) {
+        final String databaseName = "employee_management.db";
+
         Scanner scanner = new Scanner(System.in);
-        ArrayList<Employee> employees = new ArrayList<>();
+        Connection conn = SQLiteDatabase.connect(databaseName);
 
-        // These objects instantiate each employee subclass with realistic sample information.
-        // Each employee also receives a Department object, which demonstrates composition.
-        employees.add(new HourlyEmployee(
-                101, "John", "Smith",
-                new Department("Sales", "Building A"),
-                18.50, 40
-        ));
+        if (conn == null) {
+            System.out.println("Could not connect to the database. Program ending.");
+            return;
+        }
 
-        employees.add(new SalariedEmployee(
-                102, "Sarah", "Jones",
-                new Department("Human Resources", "Building B"),
-                55000
-        ));
-
-        employees.add(new CommissionEmployee(
-                103, "Mike", "Brown",
-                new Department("Marketing", "Building C"),
-                700.00, 0.10, 5000
-        ));
+        EmployeeDAO employeeDAO = new EmployeeDAO(conn);
+        employeeDAO.createEmployeeTable();
+        employeeDAO.seedSampleEmployees();
 
         int choice;
 
         System.out.println("==================================================");
-        System.out.println("Project Week 3 - Employee Management Application");
+        System.out.println("Project Week 4 - Employee Management Application");
         System.out.println("By Max Ramos");
         System.out.println("==================================================");
         System.out.println("Welcome to the Employee Management Application.");
-        System.out.println("Use the menu below to add, remove, update, display,");
-        System.out.println("and calculate employee pay information.");
-        System.out.println("This version demonstrates abstraction, constructors,");
-        System.out.println("access specifiers, inheritance, composition, and polymorphism.");
+        System.out.println("This program stores employee records in a SQLite database.");
+        System.out.println("Use the menu below to create, read, update, and delete");
+        System.out.println("employee information.");
 
         do {
-            System.out.println("\n================ MENU ================");
-            System.out.println("1. Add Employee");
-            System.out.println("2. Remove Employee");
-            System.out.println("3. Update Employee");
-            System.out.println("4. Display All Employees");
-            System.out.println("5. Display Employees by Type");
-            System.out.println("6. Display Employee Pay");
-            System.out.println("7. Exit");
-
+            displayMenu();
             choice = getIntInput(scanner, "Enter your choice: ");
 
             switch (choice) {
                 case 1:
-                    addEmployee(scanner, employees);
+                    addEmployee(scanner, employeeDAO);
                     break;
                 case 2:
-                    removeEmployee(scanner, employees);
+                    displayAllEmployees(employeeDAO);
                     break;
                 case 3:
-                    updateEmployee(scanner, employees);
+                    displayEmployeesByType(scanner, employeeDAO);
                     break;
                 case 4:
-                    displayAllEmployees(employees);
+                    searchEmployeeById(scanner, employeeDAO);
                     break;
                 case 5:
-                    displayEmployeesByType(scanner, employees);
+                    updateEmployee(scanner, employeeDAO);
                     break;
                 case 6:
-                    displayEmployeePay(employees);
+                    deleteEmployee(scanner, employeeDAO);
                     break;
                 case 7:
+                    displayEmployeePay(employeeDAO);
+                    break;
+                case 8:
                     System.out.println("Thank you for using the Employee Management Application. Goodbye.");
                     break;
                 default:
-                    System.out.println("Invalid choice. Please enter a number from 1 to 7.");
+                    System.out.println("Invalid choice. Please enter a number from 1 to 8.");
             }
 
-        } while (choice != 7);
+        } while (choice != 8);
 
         scanner.close();
     }
 
-    /*
-     * This method is private because it is only used inside the App class.
-     * This demonstrates access specifiers by not exposing helper methods publicly.
-     */
-    private static void addEmployee(Scanner scanner, ArrayList<Employee> employees) {
+    private static void displayMenu() {
+        System.out.println("\n================ MENU ================");
+        System.out.println("1. Add Employee");
+        System.out.println("2. Display All Employees");
+        System.out.println("3. Display Employees by Type");
+        System.out.println("4. Search Employee by ID");
+        System.out.println("5. Update Employee");
+        System.out.println("6. Delete Employee");
+        System.out.println("7. Display Employee Pay");
+        System.out.println("8. Exit");
+    }
+
+    private static void addEmployee(Scanner scanner, EmployeeDAO employeeDAO) {
         int id = getIntInput(scanner, "Enter employee ID: ");
 
+        if (employeeDAO.getEmployeeById(id) != null) {
+            System.out.println("An employee with that ID already exists.");
+            return;
+        }
+
+        Employee employee = collectEmployeeInformation(scanner, id);
+
+        if (employee != null) {
+            boolean success = employeeDAO.addEmployee(employee);
+
+            if (success) {
+                System.out.println("Employee added successfully.");
+            } else {
+                System.out.println("Employee was not added.");
+            }
+        }
+    }
+
+    private static void displayAllEmployees(EmployeeDAO employeeDAO) {
+        ArrayList<Employee> employees = employeeDAO.getAllEmployees();
+
+        if (employees.isEmpty()) {
+            System.out.println("No employees stored in the database.");
+            return;
+        }
+
+        System.out.println("\nEmployee Records Stored in Database");
+
+        for (Employee employee : employees) {
+            System.out.println("----------------------------------");
+            System.out.println(employee);
+        }
+    }
+
+    private static void displayEmployeesByType(Scanner scanner, EmployeeDAO employeeDAO) {
+        System.out.println("Display which type?");
+        System.out.println("1. Hourly");
+        System.out.println("2. Salaried");
+        System.out.println("3. Commission");
+
+        int typeChoice = getIntInput(scanner, "Enter choice: ");
+
+        ArrayList<Employee> employees = employeeDAO.getEmployeesByType(typeChoice);
+
+        if (employees.isEmpty()) {
+            System.out.println("No employees of that type were found.");
+            return;
+        }
+
+        for (Employee employee : employees) {
+            System.out.println("----------------------------------");
+            System.out.println(employee);
+        }
+    }
+
+    private static void searchEmployeeById(Scanner scanner, EmployeeDAO employeeDAO) {
+        int id = getIntInput(scanner, "Enter employee ID to search: ");
+
+        Employee employee = employeeDAO.getEmployeeById(id);
+
+        if (employee == null) {
+            System.out.println("Employee not found.");
+        } else {
+            System.out.println("----------------------------------");
+            System.out.println(employee);
+        }
+    }
+
+    private static void updateEmployee(Scanner scanner, EmployeeDAO employeeDAO) {
+        int id = getIntInput(scanner, "Enter employee ID to update: ");
+
+        Employee existingEmployee = employeeDAO.getEmployeeById(id);
+
+        if (existingEmployee == null) {
+            System.out.println("Employee not found. Update cancelled.");
+            return;
+        }
+
+        System.out.println("Current employee information:");
+        System.out.println("----------------------------------");
+        System.out.println(existingEmployee);
+
+        System.out.println("\nEnter the updated employee information.");
+        Employee updatedEmployee = collectEmployeeInformation(scanner, id);
+
+        if (updatedEmployee != null) {
+            boolean success = employeeDAO.updateEmployee(updatedEmployee);
+
+            if (success) {
+                System.out.println("Employee updated successfully.");
+            } else {
+                System.out.println("Employee update failed.");
+            }
+        }
+    }
+
+    private static void deleteEmployee(Scanner scanner, EmployeeDAO employeeDAO) {
+        int id = getIntInput(scanner, "Enter employee ID to delete: ");
+
+        Employee employee = employeeDAO.getEmployeeById(id);
+
+        if (employee == null) {
+            System.out.println("Employee not found. Delete cancelled.");
+            return;
+        }
+
+        System.out.println("Employee selected for deletion:");
+        System.out.println("----------------------------------");
+        System.out.println(employee);
+
+        System.out.print("Are you sure you want to delete this employee? Enter Y or N: ");
+        String confirm = scanner.nextLine();
+
+        if (confirm.equalsIgnoreCase("Y")) {
+            boolean success = employeeDAO.deleteEmployee(id);
+
+            if (success) {
+                System.out.println("Employee deleted successfully.");
+            } else {
+                System.out.println("Employee delete failed.");
+            }
+        } else {
+            System.out.println("Delete cancelled.");
+        }
+    }
+
+    private static void displayEmployeePay(EmployeeDAO employeeDAO) {
+        ArrayList<Employee> employees = employeeDAO.getAllEmployees();
+
+        if (employees.isEmpty()) {
+            System.out.println("No employees stored in the database.");
+            return;
+        }
+
+        System.out.println("\nEmployee Payment Information");
+        System.out.println("==========================================");
+
+        for (Employee employee : employees) {
+            System.out.println("----------------------------------");
+            System.out.println(employee.getFirstName() + " " + employee.getLastName());
+            System.out.println("Type: " + employee.getEmployeeType());
+            System.out.println("Pay this period: $" + String.format("%.2f", employee.calculatePay()));
+        }
+    }
+
+    private static Employee collectEmployeeInformation(Scanner scanner, int id) {
         System.out.print("Enter first name: ");
         String firstName = scanner.nextLine();
 
@@ -109,7 +249,6 @@ public class App {
         System.out.print("Enter department location: ");
         String deptLocation = scanner.nextLine();
 
-        // Constructor creates a Department object that will become part of the Employee object.
         Department department = new Department(deptName, deptLocation);
 
         System.out.println("Choose employee type:");
@@ -119,155 +258,30 @@ public class App {
 
         int typeChoice = getIntInput(scanner, "Enter choice: ");
 
-        switch (typeChoice) {
-            case 1:
-                double hourlyRate = getDoubleInput(scanner, "Enter hourly rate: ");
-                double hoursWorked = getDoubleInput(scanner, "Enter hours worked: ");
+        if (typeChoice == 1) {
+            double hourlyRate = getDoubleInput(scanner, "Enter hourly rate: ");
+            double hoursWorked = getDoubleInput(scanner, "Enter hours worked: ");
 
-                employees.add(new HourlyEmployee(id, firstName, lastName, department, hourlyRate, hoursWorked));
-                System.out.println("Hourly employee added successfully.");
-                break;
+            return new HourlyEmployee(id, firstName, lastName, department, hourlyRate, hoursWorked);
 
-            case 2:
-                double annualSalary = getDoubleInput(scanner, "Enter annual salary: ");
+        } else if (typeChoice == 2) {
+            double annualSalary = getDoubleInput(scanner, "Enter annual salary: ");
 
-                employees.add(new SalariedEmployee(id, firstName, lastName, department, annualSalary));
-                System.out.println("Salaried employee added successfully.");
-                break;
+            return new SalariedEmployee(id, firstName, lastName, department, annualSalary);
 
-            case 3:
-                double basePay = getDoubleInput(scanner, "Enter base pay: ");
-                double commissionRate = getDoubleInput(scanner, "Enter commission rate: ");
-                double salesAmount = getDoubleInput(scanner, "Enter sales amount: ");
+        } else if (typeChoice == 3) {
+            double basePay = getDoubleInput(scanner, "Enter base pay: ");
+            double commissionRate = getDoubleInput(scanner, "Enter commission rate: ");
+            double salesAmount = getDoubleInput(scanner, "Enter sales amount: ");
 
-                employees.add(new CommissionEmployee(id, firstName, lastName, department, basePay, commissionRate, salesAmount));
-                System.out.println("Commission employee added successfully.");
-                break;
+            return new CommissionEmployee(id, firstName, lastName, department, basePay, commissionRate, salesAmount);
 
-            default:
-                System.out.println("Invalid employee type. Employee was not added.");
-        }
-    }
-
-    private static void removeEmployee(Scanner scanner, ArrayList<Employee> employees) {
-        int id = getIntInput(scanner, "Enter employee ID to remove: ");
-
-        Employee employeeToRemove = null;
-
-        for (Employee employee : employees) {
-            if (employee.getEmployeeId() == id) {
-                employeeToRemove = employee;
-                break;
-            }
-        }
-
-        if (employeeToRemove != null) {
-            employees.remove(employeeToRemove);
-            System.out.println("Employee removed successfully.");
         } else {
-            System.out.println("Employee not found.");
+            System.out.println("Invalid employee type. Operation cancelled.");
+            return null;
         }
     }
 
-    private static void updateEmployee(Scanner scanner, ArrayList<Employee> employees) {
-        int id = getIntInput(scanner, "Enter employee ID to update: ");
-
-        Employee employeeToUpdate = null;
-
-        for (Employee employee : employees) {
-            if (employee.getEmployeeId() == id) {
-                employeeToUpdate = employee;
-                break;
-            }
-        }
-
-        if (employeeToUpdate == null) {
-            System.out.println("Employee not found.");
-            return;
-        }
-
-        System.out.print("Enter new first name: ");
-        String firstName = scanner.nextLine();
-
-        System.out.print("Enter new last name: ");
-        String lastName = scanner.nextLine();
-
-        System.out.print("Enter new department name: ");
-        String deptName = scanner.nextLine();
-
-        System.out.print("Enter new department location: ");
-        String deptLocation = scanner.nextLine();
-
-        employeeToUpdate.setFirstName(firstName);
-        employeeToUpdate.setLastName(lastName);
-        employeeToUpdate.setDepartment(new Department(deptName, deptLocation));
-
-        System.out.println("Employee updated successfully.");
-    }
-
-    private static void displayAllEmployees(ArrayList<Employee> employees) {
-        if (employees.isEmpty()) {
-            System.out.println("No employees to display.");
-            return;
-        }
-
-        for (Employee employee : employees) {
-            System.out.println("----------------------------------");
-            System.out.println(employee);
-        }
-    }
-
-    private static void displayEmployeesByType(Scanner scanner, ArrayList<Employee> employees) {
-        System.out.println("Display which type?");
-        System.out.println("1. Hourly");
-        System.out.println("2. Salaried");
-        System.out.println("3. Commission");
-
-        int choice = getIntInput(scanner, "Enter choice: ");
-
-        boolean found = false;
-
-        for (Employee employee : employees) {
-            if ((choice == 1 && employee instanceof HourlyEmployee) ||
-                (choice == 2 && employee instanceof SalariedEmployee) ||
-                (choice == 3 && employee instanceof CommissionEmployee)) {
-                System.out.println("----------------------------------");
-                System.out.println(employee);
-                found = true;
-            }
-        }
-
-        if (!found) {
-            System.out.println("No employees of that type found.");
-        }
-    }
-
-    private static void displayEmployeePay(ArrayList<Employee> employees) {
-        if (employees.isEmpty()) {
-            System.out.println("No employees to display.");
-            return;
-        }
-
-        System.out.println("\nEmployee Payment Information");
-        System.out.println("==========================================");
-
-        /*
-         * Polymorphism is shown here.
-         * The ArrayList stores Employee references, but the correct calculatePay()
-         * method runs depending on whether the object is hourly, salaried, or commission.
-         */
-        for (Employee employee : employees) {
-            System.out.println("----------------------------------");
-            System.out.println(employee.getFirstName() + " " + employee.getLastName());
-            System.out.println("Type: " + employee.getEmployeeType());
-            System.out.println("Pay this period: $" + String.format("%.2f", employee.calculatePay()));
-        }
-    }
-
-    /*
-     * This private helper method improves input validation.
-     * It keeps the program from crashing if the user enters text instead of a number.
-     */
     private static int getIntInput(Scanner scanner, String prompt) {
         while (true) {
             System.out.print(prompt);
@@ -280,9 +294,6 @@ public class App {
         }
     }
 
-    /*
-     * This private helper method validates decimal number input.
-     */
     private static double getDoubleInput(Scanner scanner, String prompt) {
         while (true) {
             System.out.print(prompt);

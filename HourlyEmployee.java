@@ -36,13 +36,29 @@ public class HourlyEmployee extends Employee {
         return "Hourly Employee";
     }
 
-    /*
+       /*
      * This method is required because Employee defines calculatePay() as abstract.
      * Hourly employees are paid by multiplying hourly rate by hours worked.
      */
     @Override
     public double calculatePay() {
         return hourlyRate * hoursWorked;
+    }
+
+    public double getHourlyRate() {
+        return hourlyRate;
+    }
+
+    public double getHoursWorked() {
+        return hoursWorked;
+    }
+
+    public void setHourlyRate(double hourlyRate) {
+        this.hourlyRate = hourlyRate;
+    }
+
+    public void setHoursWorked(double hoursWorked) {
+        this.hoursWorked = hoursWorked;
     }
 
     @Override
