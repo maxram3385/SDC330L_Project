@@ -1,307 +1,264 @@
 /*
- * Name: Max Ramos
- * Date: May 3 2026
- * Assignment: Week 4 Project - Database Interactions
- * Purpose: Main application file that allows the user to manage employee records
- * through a console menu. This version stores data in a SQLite database and
- * demonstrates Create, Read, Update, and Delete database operations.
- */
+Name: Max Ramos
+Date: May 8, 2026
+SDC330 Course Project - Aquarium Maintenance App
+
+Runs the aquarium maintenance console application.
+
+This program allows the user to:
+- Add customer accounts
+- View all customer accounts
+- Search customer accounts
+- Update customer account and tank information
+- Delete customer accounts
+
+The application uses a SQLite database for CRUD operations.
+*/
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class App {
-    public static void main(String[] args) {
-        final String databaseName = "employee_management.db";
+    private static final String DATABASE_NAME = "aquarium_maintenance.db";
+    private static Scanner input = new Scanner(System.in);
+    private static CustomerAccountDAO dao;
 
-        Scanner scanner = new Scanner(System.in);
-        Connection conn = SQLiteDatabase.connect(databaseName);
+    public static void main(String[] args) {
+        Connection conn = SQLiteDatabase.connect(DATABASE_NAME);
 
         if (conn == null) {
             System.out.println("Could not connect to the database. Program ending.");
             return;
         }
 
-        EmployeeDAO employeeDAO = new EmployeeDAO(conn);
-        employeeDAO.createEmployeeTable();
-        employeeDAO.seedSampleEmployees();
+        dao = new CustomerAccountDAO(conn);
+        dao.createTables();
+        dao.seedSampleData();
 
         int choice;
 
-        System.out.println("==================================================");
-        System.out.println("Project Week 4 - Employee Management Application");
-        System.out.println("By Max Ramos");
-        System.out.println("==================================================");
-        System.out.println("Welcome to the Employee Management Application.");
-        System.out.println("This program stores employee records in a SQLite database.");
-        System.out.println("Use the menu below to create, read, update, and delete");
-        System.out.println("employee information.");
-
         do {
             displayMenu();
-            choice = getIntInput(scanner, "Enter your choice: ");
+            choice = getIntInput("Enter your choice: ");
 
             switch (choice) {
                 case 1:
-                    addEmployee(scanner, employeeDAO);
+                    addCustomerAccount();
                     break;
                 case 2:
-                    displayAllEmployees(employeeDAO);
+                    viewAllAccounts();
                     break;
                 case 3:
-                    displayEmployeesByType(scanner, employeeDAO);
+                    searchAccount();
                     break;
                 case 4:
-                    searchEmployeeById(scanner, employeeDAO);
+                    updateAccount();
                     break;
                 case 5:
-                    updateEmployee(scanner, employeeDAO);
+                    deleteAccount();
                     break;
                 case 6:
-                    deleteEmployee(scanner, employeeDAO);
-                    break;
-                case 7:
-                    displayEmployeePay(employeeDAO);
-                    break;
-                case 8:
-                    System.out.println("Thank you for using the Employee Management Application. Goodbye.");
+                    System.out.println("Exiting Aquarium Maintenance App. Goodbye!");
                     break;
                 default:
-                    System.out.println("Invalid choice. Please enter a number from 1 to 8.");
+                    System.out.println("Invalid choice. Please try again.");
             }
 
-        } while (choice != 8);
+        } while (choice != 6);
 
-        scanner.close();
+        try {
+            conn.close();
+        } catch (SQLException e) {
+            System.out.println("Error closing database connection: " + e.getMessage());
+        }
     }
 
-    private static void displayMenu() {
-        System.out.println("\n================ MENU ================");
-        System.out.println("1. Add Employee");
-        System.out.println("2. Display All Employees");
-        System.out.println("3. Display Employees by Type");
-        System.out.println("4. Search Employee by ID");
-        System.out.println("5. Update Employee");
-        System.out.println("6. Delete Employee");
-        System.out.println("7. Display Employee Pay");
-        System.out.println("8. Exit");
+    public static void displayMenu() {
+        System.out.println("\n=== Aquarium Maintenance Account Manager ===");
+        System.out.println("1. Add Customer Account");
+        System.out.println("2. View All Accounts");
+        System.out.println("3. Search Account by Customer Name");
+        System.out.println("4. Update Customer Account and Tank Information");
+        System.out.println("5. Delete Account");
+        System.out.println("6. Exit");
     }
 
-    private static void addEmployee(Scanner scanner, EmployeeDAO employeeDAO) {
-        int id = getIntInput(scanner, "Enter employee ID: ");
+    public static void addCustomerAccount() {
+        System.out.println("\n--- Add Customer Account ---");
 
-        if (employeeDAO.getEmployeeById(id) != null) {
-            System.out.println("An employee with that ID already exists.");
+        System.out.print("Customer Name: ");
+        String customerName = input.nextLine();
+
+        System.out.print("Phone Number: ");
+        String phoneNumber = input.nextLine();
+
+        System.out.print("Email: ");
+        String email = input.nextLine();
+
+        System.out.print("Assigned Worker: ");
+        String assignedWorker = input.nextLine();
+
+        System.out.print("Service Frequency: ");
+        String serviceFrequency = input.nextLine();
+
+        double monthlyPrice = getDoubleInput("Monthly Price: ");
+
+        System.out.print("Maintenance Notes: ");
+        String maintenanceNotes = input.nextLine();
+
+        System.out.print("Tank Type: ");
+        String tankType = input.nextLine();
+
+        double tankSize = getDoubleInput("Tank Size in Gallons: ");
+
+        System.out.print("Water Type: ");
+        String waterType = input.nextLine();
+
+        Tank tank = new Tank(0, tankType, tankSize, waterType);
+
+        CustomerAccount customerAccount = new CustomerAccount(
+                0,
+                customerName,
+                phoneNumber,
+                email,
+                assignedWorker,
+                serviceFrequency,
+                monthlyPrice,
+                maintenanceNotes,
+                tank
+        );
+
+        dao.insertCustomerAccount(customerAccount);
+    }
+
+    public static void viewAllAccounts() {
+        System.out.println("\n--- All Customer Accounts ---");
+
+        ArrayList<CustomerAccount> customerAccounts = dao.getAllCustomerAccounts();
+
+        if (customerAccounts.isEmpty()) {
+            System.out.println("No customer accounts found.");
             return;
         }
 
-        Employee employee = collectEmployeeInformation(scanner, id);
+        ArrayList<Account> accounts = new ArrayList<>();
 
-        if (employee != null) {
-            boolean success = employeeDAO.addEmployee(employee);
+        for (CustomerAccount customerAccount : customerAccounts) {
+            accounts.add(customerAccount);
+        }
 
-            if (success) {
-                System.out.println("Employee added successfully.");
-            } else {
-                System.out.println("Employee was not added.");
-            }
+        for (Account account : accounts) {
+            System.out.println("\n-----------------------------");
+            System.out.println(account.getSummary());
         }
     }
 
-    private static void displayAllEmployees(EmployeeDAO employeeDAO) {
-        ArrayList<Employee> employees = employeeDAO.getAllEmployees();
+    public static void searchAccount() {
+        System.out.println("\n--- Search Account ---");
+        System.out.print("Enter customer name to search: ");
+        String searchName = input.nextLine();
 
-        if (employees.isEmpty()) {
-            System.out.println("No employees stored in the database.");
+        ArrayList<CustomerAccount> customerAccounts = dao.searchCustomerAccountsByName(searchName);
+
+        if (customerAccounts.isEmpty()) {
+            System.out.println("No account found with that customer name.");
             return;
         }
 
-        System.out.println("\nEmployee Records Stored in Database");
-
-        for (Employee employee : employees) {
-            System.out.println("----------------------------------");
-            System.out.println(employee);
+        for (Account account : customerAccounts) {
+            System.out.println("\nAccount Found:");
+            System.out.println(account.getSummary());
         }
     }
 
-    private static void displayEmployeesByType(Scanner scanner, EmployeeDAO employeeDAO) {
-        System.out.println("Display which type?");
-        System.out.println("1. Hourly");
-        System.out.println("2. Salaried");
-        System.out.println("3. Commission");
+    public static void updateAccount() {
+        System.out.println("\n--- Update Customer Account and Tank Information ---");
 
-        int typeChoice = getIntInput(scanner, "Enter choice: ");
+        int accountId = getIntInput("Enter account ID to update: ");
 
-        ArrayList<Employee> employees = employeeDAO.getEmployeesByType(typeChoice);
+        System.out.print("New Customer Name: ");
+        String newCustomerName = input.nextLine();
 
-        if (employees.isEmpty()) {
-            System.out.println("No employees of that type were found.");
-            return;
-        }
+        System.out.print("New Phone Number: ");
+        String newPhoneNumber = input.nextLine();
 
-        for (Employee employee : employees) {
-            System.out.println("----------------------------------");
-            System.out.println(employee);
-        }
-    }
+        System.out.print("New Email: ");
+        String newEmail = input.nextLine();
 
-    private static void searchEmployeeById(Scanner scanner, EmployeeDAO employeeDAO) {
-        int id = getIntInput(scanner, "Enter employee ID to search: ");
+        System.out.print("New Assigned Worker: ");
+        String newAssignedWorker = input.nextLine();
 
-        Employee employee = employeeDAO.getEmployeeById(id);
+        System.out.print("New Service Frequency: ");
+        String newServiceFrequency = input.nextLine();
 
-        if (employee == null) {
-            System.out.println("Employee not found.");
+        double newMonthlyPrice = getDoubleInput("New Monthly Price: ");
+
+        System.out.print("New Maintenance Notes: ");
+        String newMaintenanceNotes = input.nextLine();
+
+        System.out.print("New Tank Type: ");
+        String newTankType = input.nextLine();
+
+        double newTankSize = getDoubleInput("New Tank Size in Gallons: ");
+
+        System.out.print("New Water Type: ");
+        String newWaterType = input.nextLine();
+
+        boolean updated = dao.updateCustomerAccount(
+                accountId,
+                newCustomerName,
+                newPhoneNumber,
+                newEmail,
+                newAssignedWorker,
+                newServiceFrequency,
+                newMonthlyPrice,
+                newMaintenanceNotes,
+                newTankType,
+                newTankSize,
+                newWaterType
+        );
+
+        if (updated) {
+            System.out.println("Customer account and tank information updated successfully.");
         } else {
-            System.out.println("----------------------------------");
-            System.out.println(employee);
+            System.out.println("No account found with that ID.");
         }
     }
 
-    private static void updateEmployee(Scanner scanner, EmployeeDAO employeeDAO) {
-        int id = getIntInput(scanner, "Enter employee ID to update: ");
+    public static void deleteAccount() {
+        System.out.println("\n--- Delete Account ---");
 
-        Employee existingEmployee = employeeDAO.getEmployeeById(id);
+        int accountId = getIntInput("Enter account ID to delete: ");
 
-        if (existingEmployee == null) {
-            System.out.println("Employee not found. Update cancelled.");
-            return;
-        }
+        boolean deleted = dao.deleteCustomerAccount(accountId);
 
-        System.out.println("Current employee information:");
-        System.out.println("----------------------------------");
-        System.out.println(existingEmployee);
-
-        System.out.println("\nEnter the updated employee information.");
-        Employee updatedEmployee = collectEmployeeInformation(scanner, id);
-
-        if (updatedEmployee != null) {
-            boolean success = employeeDAO.updateEmployee(updatedEmployee);
-
-            if (success) {
-                System.out.println("Employee updated successfully.");
-            } else {
-                System.out.println("Employee update failed.");
-            }
-        }
-    }
-
-    private static void deleteEmployee(Scanner scanner, EmployeeDAO employeeDAO) {
-        int id = getIntInput(scanner, "Enter employee ID to delete: ");
-
-        Employee employee = employeeDAO.getEmployeeById(id);
-
-        if (employee == null) {
-            System.out.println("Employee not found. Delete cancelled.");
-            return;
-        }
-
-        System.out.println("Employee selected for deletion:");
-        System.out.println("----------------------------------");
-        System.out.println(employee);
-
-        System.out.print("Are you sure you want to delete this employee? Enter Y or N: ");
-        String confirm = scanner.nextLine();
-
-        if (confirm.equalsIgnoreCase("Y")) {
-            boolean success = employeeDAO.deleteEmployee(id);
-
-            if (success) {
-                System.out.println("Employee deleted successfully.");
-            } else {
-                System.out.println("Employee delete failed.");
-            }
+        if (deleted) {
+            System.out.println("Account deleted successfully.");
         } else {
-            System.out.println("Delete cancelled.");
+            System.out.println("No account found with that ID.");
         }
     }
 
-    private static void displayEmployeePay(EmployeeDAO employeeDAO) {
-        ArrayList<Employee> employees = employeeDAO.getAllEmployees();
-
-        if (employees.isEmpty()) {
-            System.out.println("No employees stored in the database.");
-            return;
-        }
-
-        System.out.println("\nEmployee Payment Information");
-        System.out.println("==========================================");
-
-        for (Employee employee : employees) {
-            System.out.println("----------------------------------");
-            System.out.println(employee.getFirstName() + " " + employee.getLastName());
-            System.out.println("Type: " + employee.getEmployeeType());
-            System.out.println("Pay this period: $" + String.format("%.2f", employee.calculatePay()));
-        }
-    }
-
-    private static Employee collectEmployeeInformation(Scanner scanner, int id) {
-        System.out.print("Enter first name: ");
-        String firstName = scanner.nextLine();
-
-        System.out.print("Enter last name: ");
-        String lastName = scanner.nextLine();
-
-        System.out.print("Enter department name: ");
-        String deptName = scanner.nextLine();
-
-        System.out.print("Enter department location: ");
-        String deptLocation = scanner.nextLine();
-
-        Department department = new Department(deptName, deptLocation);
-
-        System.out.println("Choose employee type:");
-        System.out.println("1. Hourly");
-        System.out.println("2. Salaried");
-        System.out.println("3. Commission");
-
-        int typeChoice = getIntInput(scanner, "Enter choice: ");
-
-        if (typeChoice == 1) {
-            double hourlyRate = getDoubleInput(scanner, "Enter hourly rate: ");
-            double hoursWorked = getDoubleInput(scanner, "Enter hours worked: ");
-
-            return new HourlyEmployee(id, firstName, lastName, department, hourlyRate, hoursWorked);
-
-        } else if (typeChoice == 2) {
-            double annualSalary = getDoubleInput(scanner, "Enter annual salary: ");
-
-            return new SalariedEmployee(id, firstName, lastName, department, annualSalary);
-
-        } else if (typeChoice == 3) {
-            double basePay = getDoubleInput(scanner, "Enter base pay: ");
-            double commissionRate = getDoubleInput(scanner, "Enter commission rate: ");
-            double salesAmount = getDoubleInput(scanner, "Enter sales amount: ");
-
-            return new CommissionEmployee(id, firstName, lastName, department, basePay, commissionRate, salesAmount);
-
-        } else {
-            System.out.println("Invalid employee type. Operation cancelled.");
-            return null;
-        }
-    }
-
-    private static int getIntInput(Scanner scanner, String prompt) {
+    public static int getIntInput(String prompt) {
         while (true) {
-            System.out.print(prompt);
-
             try {
-                return Integer.parseInt(scanner.nextLine());
+                System.out.print(prompt);
+                return Integer.parseInt(input.nextLine());
             } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a whole number.");
+                System.out.println("Please enter a valid whole number.");
             }
         }
     }
 
-    private static double getDoubleInput(Scanner scanner, String prompt) {
+    public static double getDoubleInput(String prompt) {
         while (true) {
-            System.out.print(prompt);
-
             try {
-                return Double.parseDouble(scanner.nextLine());
+                System.out.print(prompt);
+                return Double.parseDouble(input.nextLine());
             } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a valid number.");
+                System.out.println("Please enter a valid number.");
             }
         }
     }
