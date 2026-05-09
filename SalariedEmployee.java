@@ -1,7 +1,7 @@
 /*
  * Name: Max Ramos
- * Date: March 3, 2026
- * Assignment: Week 3 Project - Employee Management Application
+ * Date: May 9, 2026
+ * Assignment: Phase Final Project - Employee Management Application
  * Purpose: Child class of Employee used to demonstrate inheritance,
  * abstraction, constructors, and pay calculation.
  */
@@ -20,7 +20,8 @@ public class SalariedEmployee extends Employee {
 
     /*
      * Full constructor.
-     * Sends shared employee information to the abstract Employee base class.
+     * Sends shared employee information to the abstract Employee base class
+     * and stores salaried employee-specific information in this class.
      */
     public SalariedEmployee(int employeeId, String firstName, String lastName,
                             Department department, double annualSalary) {

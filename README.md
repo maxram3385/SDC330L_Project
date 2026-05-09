@@ -1,91 +1,118 @@
-# Project Name: Aquarium Maintenance Management App
+# Employee Management Application
 
-## Project Description
-The Aquarium Maintenance Management App is a Java console application designed to help manage customer aquarium maintenance accounts. The application allows a user to add, view, search, update, and delete customer service records. Each customer account includes contact information, assigned maintenance worker, service frequency, monthly price, maintenance notes, and linked aquarium tank information such as tank type, tank size, and water type.
+## Project Summary
 
-The application uses a SQLite database to store customer account and tank information. The database includes two related tables, CustomerAccounts and Tanks, connected through a foreign key relationship.
+This project is a console-based Employee Management Application created for the SDC330L course. The application allows a user to manage employee records through a menu-driven interface. The user can add employees, display all employees, display employees by type, search for employees by ID, update employee records, delete employees, and display employee pay information.
 
-## Project Tasks
-- **Task 1: Set up the development environment**
-  - Install and configure Java extensions for VS Code
-  - Configure Git and GitHub repository
-  - Confirm Java and SQLite JDBC setup
+The final version of this project combines the work from previous project phases into one complete application. The first phase focused on user interaction and menu design. The second phase focused on software design and object-oriented programming structure. Later phases added inheritance, abstraction, polymorphism, composition, and database interaction. The final application stores employee information in a SQLite database and uses full CRUD functionality.
 
-- **Task 2: Design the application**
-  - Create the project proposal
-  - Define the purpose and output of the application
-  - Plan customer account and tank data storage
-  - Create class definitions and database table structure
+## Features
 
-- **Task 3: Develop the application structure**
-  - Create the main App class
-  - Create customer account and tank classes
-  - Create shared account structure using an abstract Account class
-  - Create a Serviceable interface for service-related behavior
+- Add new employee records
+- Display all employees
+- Display employees by type
+- Search employees by ID
+- Update employee records
+- Delete employee records
+- Display calculated employee pay
+- Store employee records in a SQLite database
+- Seed sample employee data when the database is empty
+- Use input validation for menu choices and numeric values
 
-- **Task 4: Connect to a database**
-  - Implement SQLite database connection
-  - Create the Tanks table
-  - Create the CustomerAccounts table
-  - Connect customer accounts to tank records using a foreign key
+## Object-Oriented Programming Concepts Used
 
-- **Task 5: Implement create and read operations**
-  - Add new customer accounts
-  - Store linked tank information
-  - View all customer accounts
-  - Display account summaries and tank details
+### Abstraction
 
-- **Task 6: Implement search, update, and delete operations**
-  - Search customer accounts by customer name
-  - Update customer account information
-  - Update linked tank information
-  - Delete customer accounts and related tank records
+The `Employee` class is an abstract base class. It contains shared employee information, but it does not represent one specific type of employee on its own. The child classes define the specific employee types.
 
-- **Task 7: Add validation and error handling**
-  - Validate whole number input
-  - Validate decimal input
-  - Handle database connection errors
-  - Use transaction handling with commit and rollback
+### Inheritance
 
-- **Task 8: Test the application**
-  - Test adding customer records
-  - Test viewing all customer records
-  - Test searching by customer name
-  - Test updating customer and tank information
-  - Test deleting customer records
-  - Debug and fix database or input issues
+The application uses inheritance through the following child classes:
 
-- **Task 9: Document the project**
-  - Create a complete README file
-  - Document the project purpose and development process
-  - Explain the programming languages and tools used
-  - Prepare the project for GitHub submission
+- `HourlyEmployee`
+- `SalariedEmployee`
+- `CommissionEmployee`
 
-## Project Skills Learned
-- Java console application development
-- Object-oriented programming
-- Abstract class usage
-- Interface implementation
-- Composition using linked objects
-- SQLite database management
-- CRUD database operations
-- PreparedStatement usage
-- Generated key handling
-- Transaction handling with commit and rollback
-- Input validation
-- Git and GitHub version control
-- Writing project documentation
+Each of these classes extends the abstract `Employee` class and reuses the shared employee fields and methods.
 
-## Language Used
-- **Java**: Used to create the console application, classes, menu system, and program logic
-- **SQL**: Used to create tables and perform database operations
-- **SQLite**: Used as the database system for storing customer account and tank records
+### Polymorphism
 
-## Development Process Used
-The project was developed in stages. First, the application idea was created as a project proposal based on the need for an organized aquarium maintenance account system. Next, the application design was planned by identifying the main classes, data fields, database tables, and expected program output.
+Polymorphism is demonstrated through the `calculatePay()` method. Each employee type calculates pay differently, but the application can call the same method name on different employee objects.
 
-After the design phase, the Java classes were created. The App class was used to run the menu system, while CustomerAccount and Tank stored the main customer and aquarium data. The Account abstract class and Serviceable interface were added to support object-oriented design.
+### Composition
 
-The database phase added SQLite support through a database connection class and a DAO class. The DAO class was used to separate database operations from the main application logic. CRUD operations were implemented so the user could add, view, search, update, and delete customer records.
+Composition is demonstrated with the `Department` class. Each `Employee` object contains a `Department` object as part of its information.
 
-The final release improved the update feature so that both customer account information and linked tank details can be updated from the menu. This allows the full account record to be maintained more accurately. The application was tested through the console by running each menu option and confirming that the SQLite database stored and updated the correct information.
+### Interface
+
+The `Payable` interface defines the `calculatePay()` method. Each employee type implements this behavior in its own way.
+
+## Database Functionality
+
+This project uses SQLite to store employee records. The `EmployeeDAO` class handles database operations and separates the database logic from the main application menu.
+
+The database functionality includes:
+
+- Creating the employee table
+- Adding employee records
+- Reading all employee records
+- Searching employees by ID
+- Filtering employees by type
+- Updating full employee records
+- Deleting employee records
+- Reconstructing employee objects from database rows
+
+## Classes Included
+
+### App.java
+
+Controls the main menu and user interaction.
+
+### Employee.java
+
+Abstract base class for all employee types.
+
+### HourlyEmployee.java
+
+Child class for hourly employees.
+
+### SalariedEmployee.java
+
+Child class for salaried employees.
+
+### CommissionEmployee.java
+
+Child class for commission employees.
+
+### Department.java
+
+Stores department name and location information.
+
+### Payable.java
+
+Interface requiring employee classes to calculate pay.
+
+### EmployeeDAO.java
+
+Handles all SQLite database CRUD operations.
+
+### SQLiteDatabase.java
+
+Creates the SQLite database connection.
+
+## How to Run the Program
+
+1. Open the project in Visual Studio Code.
+2. Make sure the SQLite JDBC driver is available for the project.
+3. Compile the Java files.
+4. Run `App.java`.
+5. Use the console menu to interact with the Employee Management Application.
+
+
+## GitHub Repository
+
+https://github.com/maxram3385/SDC330L_Project
+
+## Author
+
+Max Ramos

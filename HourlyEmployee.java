@@ -1,7 +1,7 @@
 /*
  * Name: Max Ramos
- * Date: April 26, 2026
- * Assignment: Week 3 Project - Employee Management Application
+ * Date: May 9, 2026
+ * Assignment: Phase Final Project - Employee Management Application
  * Purpose: Child class of Employee used to demonstrate inheritance,
  * abstraction, constructors, and pay calculation.
  */
@@ -22,7 +22,8 @@ public class HourlyEmployee extends Employee {
 
     /*
      * Full constructor.
-     * Sends shared employee information to the abstract Employee base class.
+     * Sends shared employee information to the abstract Employee base class
+     * and stores hourly employee-specific information in this class.
      */
     public HourlyEmployee(int employeeId, String firstName, String lastName,
                           Department department, double hourlyRate, double hoursWorked) {
@@ -36,7 +37,7 @@ public class HourlyEmployee extends Employee {
         return "Hourly Employee";
     }
 
-       /*
+    /*
      * This method is required because Employee defines calculatePay() as abstract.
      * Hourly employees are paid by multiplying hourly rate by hours worked.
      */

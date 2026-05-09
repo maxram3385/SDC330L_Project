@@ -1,11 +1,15 @@
 /*
  * Name: Max Ramos
- * Date: April 26, 2026
- * Assignment: Week 3 Project - Employee Management Application
+ * Date: May 9, 2026
+ * Assignment: Phase Final Project - Employee Management Application
  * Purpose: Department class used to demonstrate composition and constructors.
  */
 
 public class Department {
+    /*
+     * Private fields are used so department data cannot be changed directly
+     * from outside the class.
+     */
     private String departmentName;
     private String location;
 
@@ -19,9 +23,8 @@ public class Department {
     }
 
     /*
-     * Constructor with only department name.
-     * This is an overloaded constructor that gives the class another way
-     * to create a Department object.
+     * Overloaded constructor.
+     * This allows a Department object to be created with only a department name.
      */
     public Department(String departmentName) {
         this.departmentName = departmentName;

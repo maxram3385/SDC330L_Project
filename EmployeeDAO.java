@@ -1,7 +1,7 @@
 /*
  * Name: Max Ramos
- * Date: May 3 2026
- * Assignment: Week 4 Project - Database Interactions
+ * Date: May 9, 2026
+ * Assignment: Phase Final Project - Employee Management Application
  * Purpose: Data Access Object class that performs Create, Read, Update,
  * and Delete operations for employee records stored in a SQLite database.
  */
@@ -10,8 +10,16 @@ import java.sql.*;
 import java.util.ArrayList;
 
 public class EmployeeDAO {
+    /*
+     * The Connection object is private because only this DAO class should
+     * directly use it for employee database operations.
+     */
     private Connection conn;
 
+    /*
+     * Constructor.
+     * Receives the database connection from the main application.
+     */
     public EmployeeDAO(Connection conn) {
         this.conn = conn;
     }
@@ -40,6 +48,10 @@ public class EmployeeDAO {
     }
 
     public void seedSampleEmployees() {
+        /*
+         * Sample employees are only added when the database table is empty.
+         * This prevents duplicate records every time the program starts.
+         */
         if (!getAllEmployees().isEmpty()) {
             return;
         }
@@ -86,6 +98,10 @@ public class EmployeeDAO {
             pstmt.setString(5, employee.getDepartment().getLocation());
             pstmt.setString(6, employee.getEmployeeType());
 
+            /*
+             * The instanceof checks determine which subclass-specific fields
+             * should be saved to the database.
+             */
             if (employee instanceof HourlyEmployee) {
                 HourlyEmployee hourly = (HourlyEmployee) employee;
                 pstmt.setDouble(7, hourly.getHourlyRate());
@@ -265,6 +281,11 @@ public class EmployeeDAO {
         }
     }
 
+    /*
+     * This helper method reconstructs the correct Employee subclass from
+     * database data. This is important because the database stores rows,
+     * while the Java program works with objects.
+     */
     private Employee createEmployeeFromResultSet(ResultSet rs) throws SQLException {
         int employeeId = rs.getInt("employee_id");
         String firstName = rs.getString("first_name");

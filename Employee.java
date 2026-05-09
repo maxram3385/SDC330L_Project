@@ -1,16 +1,16 @@
 /*
  * Name: Max Ramos
- * Date: April 26, 2026
- * Assignment: Week 3 Project - Employee Management Application
+ * Date: May 9, 2026
+ * Assignment: Phase Final Project - Employee Management Application
  * Purpose: Abstract base Employee class used to demonstrate abstraction,
  * inheritance, constructors, composition, and access specifiers.
  */
 
 public abstract class Employee implements Payable {
     /*
-     * These fields are private because they should not be accessed directly
-     * from outside the class. Access is controlled through public getters
-     * and setters.
+     * These fields are private access specifiers.
+     * Private fields cannot be accessed directly from outside this class.
+     * This protects the data and supports encapsulation.
      */
     private int employeeId;
     private String firstName;
@@ -19,8 +19,7 @@ public abstract class Employee implements Payable {
 
     /*
      * Default constructor.
-     * This gives the class a basic way to create an employee object through subclasses
-     * when no specific values are provided.
+     * This gives subclasses a basic Employee setup when no values are provided.
      */
     public Employee() {
         this.employeeId = 0;
@@ -31,7 +30,8 @@ public abstract class Employee implements Payable {
 
     /*
      * Full constructor.
-     * This allows subclasses to send complete employee information to the base class.
+     * This constructor allows subclasses to pass shared employee information
+     * into the abstract Employee base class.
      */
     public Employee(int employeeId, String firstName, String lastName, Department department) {
         this.employeeId = employeeId;
@@ -40,6 +40,9 @@ public abstract class Employee implements Payable {
         this.department = department;
     }
 
+    /*
+     * Public getter methods provide controlled access to private fields.
+     */
     public int getEmployeeId() {
         return employeeId;
     }
@@ -56,6 +59,9 @@ public abstract class Employee implements Payable {
         return department;
     }
 
+    /*
+     * Public setter methods allow controlled updates to private fields.
+     */
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
@@ -69,8 +75,8 @@ public abstract class Employee implements Payable {
     }
 
     /*
-     * This protected method is only intended for this class and its subclasses.
-     * It lets child classes reuse the same formatted employee information.
+     * Protected access allows this method to be used by Employee and its child
+     * classes, but not freely accessed from unrelated classes.
      */
     protected String getBasicEmployeeInfo() {
         return "Employee ID: " + employeeId +
@@ -81,14 +87,14 @@ public abstract class Employee implements Payable {
 
     /*
      * Abstract method.
-     * The Employee class does not define one generic employee type.
-     * Each subclass must provide its own employee type.
+     * Employee is a general base class, so it does not define one employee type.
+     * Each child class must provide its own employee type.
      */
     public abstract String getEmployeeType();
 
     /*
      * Abstract method from the Payable interface.
-     * Each subclass must calculate pay in its own way.
+     * Each child class must calculate pay differently.
      */
     public abstract double calculatePay();
 
